@@ -17,7 +17,6 @@ if (!function_exists('filesize_to_human')) {
 
         return sprintf("%.{$decimals}f", $bytes / pow(1024, $factor)) . @$size[$factor];
     }
-
 }
 
 if (!function_exists('get_temp_path')) {
@@ -33,5 +32,4 @@ if (!function_exists('get_temp_path')) {
     {
         return tempnam(sys_get_temp_dir(), $name);
     }
-
 }
