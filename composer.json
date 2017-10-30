@@ -18,8 +18,8 @@
     "require": {
         "ramsey/uuid": "^3.5",
         "intervention/image": "^2.3",
-        "illuminate/support": "^5.3|^5.4",
-        "illuminate/database": "^5.3|^5.4",
+        "illuminate/support": "^5.3|^5.4|^5.5",
+        "illuminate/database": "^5.3|^5.4|^5.5",
         "danielstjules/stringy": "^2.8|^3.0",
         "cloudconvert/cloudconvert-php": "^2.2"
     },
