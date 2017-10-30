@@ -607,8 +607,21 @@ class File extends Model
             $file->name = str_replace(".{$upload->getClientOriginalExtension()}", '', $upload->getClientOriginalName());
         }
 
+        // Extract the mimetype from the file
+        $mimeType = array_get($attributes, 'client_mime', false) === true ? $upload->getClientMimeType() : $upload->getMimeType();
+
+        // Check if we are allowed to fallback to the client mime
+        if ($mimeType === null && array_get($attributes, 'client_mime', false) === false && array_get($attributes, 'client_mime_fallback', true) === true) {
+            $mimeType = $upload->getClientMimeType();
+        }
+
         // Extract the type from the mime of the file
-        $type = self::getTypeForMime($upload->getMimeType());
+        $type = self::getTypeForMime($mimeType);
+
+        // Abort if we cannot find a valid type, this file is probably not allowed
+        if ($type === null) {
+            return false;
+        }
 
         // If the file is a image we also need to find out the dimensions
         if ($type === FileTypes::TYPE_IMAGE) {
@@ -628,7 +641,7 @@ class File extends Model
             str_replace(".{$upload->getClientOriginalExtension()}", '', $upload->getClientOriginalName())
         )->trim()->toLowerCase()->slugify();
         $file->extension = strtolower($upload->getClientOriginalExtension());
-        $file->mime_type = $upload->getMimeType();
+        $file->mime_type = $mimeType;
         $file->size      = $upload->getSize();
         $file->is_hidden = array_get($attributes, 'is_hidden', false);
         $file->completed = true;
