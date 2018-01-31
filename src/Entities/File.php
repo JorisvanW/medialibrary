@@ -684,10 +684,14 @@ class File extends Model
      */
     public function requestTransformation($name)
     {
-        $transformer = config("medialibrary.file_types.{$this->attributes['type']}.transformations.{$name}");
+        if ($name === 'thumb') {
+            $transformer = config("medialibrary.file_types.{$this->attributes['type']}.thumb");
+        } else {
+            $transformer = config("medialibrary.file_types.{$this->attributes['type']}.transformations.{$name}");
+        }
 
         if (empty($transformer)) {
-            throw new RuntimeException("Invalid transformer \"{$name}\" requested form file type \"{$this->attributes['type']}\".");
+            throw new RuntimeException("Invalid transformer \"{$name}\" requested for file type \"{$this->attributes['type']}\".");
 
             return;
         }
