@@ -6,8 +6,6 @@ use Ramsey\Uuid\Uuid;
 use CipeMotion\Medialibrary\Entities\File;
 use Illuminate\Foundation\Bus\DispatchesJobs;
 use CipeMotion\Medialibrary\Jobs\DeleteFileJob;
-use CipeMotion\Medialibrary\Jobs\TransformFileQueuedJob;
-use CipeMotion\Medialibrary\Jobs\TransformFileUnqueuedJob;
 
 class FileObserver
 {
@@ -25,30 +23,8 @@ class FileObserver
         $groupTransformations = $file->getGroupTransformations();
 
         if (count($groupTransformations)) {
-            foreach ($groupTransformations as $name => $transformer) {
-                $queue = array_get($transformer, 'queued');
-
-                if ($queue === false) {
-                    $job = new TransformFileUnqueuedJob(
-                        $file,
-                        $name,
-                        array_get($transformer, 'transformer'),
-                        array_get($transformer, 'config', [])
-                    );
-                } else {
-                    $job = new TransformFileQueuedJob(
-                        $file,
-                        $name,
-                        array_get($transformer, 'transformer'),
-                        array_get($transformer, 'config', [])
-                    );
-
-                    if (is_string($queue)) {
-                        $job->onQueue($job);
-                    }
-                }
-
-                $this->dispatch($job);
+            foreach (array_keys($groupTransformations) as $name) {
+                $file->requestTransformation($name);
             }
         }
     }

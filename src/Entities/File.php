@@ -5,6 +5,8 @@ namespace CipeMotion\Medialibrary\Entities;
 use Exception;
 use Stringy\Stringy;
 use Ramsey\Uuid\Uuid;
+use RuntimeException;
+use CipeMotion\Medialibrary\Jobs;
 use Intervention\Image\Facades\Image;
 use CipeMotion\Medialibrary\FileTypes;
 use Illuminate\Support\Facades\Storage;
@@ -363,9 +365,7 @@ class File extends Model
      */
     public function getPreviewIsProcessingAttribute()
     {
-        if (in_array($this->type, [FileTypes::TYPE_IMAGE, FileTypes::TYPE_DOCUMENT, FileTypes::TYPE_VIDEO])
-            && is_null($this->getPreviewFullAttribute())
-        ) {
+        if (in_array($this->type, [FileTypes::TYPE_IMAGE, FileTypes::TYPE_DOCUMENT, FileTypes::TYPE_VIDEO]) && is_null($this->getPreviewFullAttribute())) {
             $transformationName = $this->type === FileTypes::TYPE_IMAGE ? 'thumb' : 'preview';
             $transformation     = $this->transformations->where('name', $transformationName)->first();
 
@@ -509,12 +509,8 @@ class File extends Model
             $transformerGroups = config("medialibrary.file_types.{$this->attributes['type']}.transformationGroups");
 
             // Check if we have transformation group else use default
-            $group = isset($this->attributes['group']) ? $this->attributes['group'] : null;
-            if (is_null($group) || !array_has($transformerGroups, $group)) {
-                $transformerGroup = array_get($transformerGroups, 'default', []);
-            } else {
-                $transformerGroup = array_get($transformerGroups, $group, []);
-            }
+            $group            = isset($this->attributes['group']) ? $this->attributes['group'] : null;
+            $transformerGroup = array_get($transformerGroups, is_null($group) || !array_has($transformerGroups, $group) ? 'default' : $group, []);
 
             // Transformations array with default thumb generator
             $transformations = [
@@ -678,5 +674,38 @@ class File extends Model
     private function isDiskLocal($disk)
     {
         return config("filesystems.disks.{$disk}.driver") === 'local';
+    }
+
+
+    /**
+     * Request a transformation.
+     *
+     * @param string $name
+     */
+    public function requestTransformation($name)
+    {
+        if ($name === 'thumb') {
+            $transformer = config("medialibrary.file_types.{$this->attributes['type']}.thumb");
+        } else {
+            $transformer = config("medialibrary.file_types.{$this->attributes['type']}.transformations.{$name}");
+        }
+
+        if (empty($transformer)) {
+            throw new RuntimeException("Invalid transformer \"{$name}\" requested for file type \"{$this->attributes['type']}\".");
+
+            return;
+        }
+
+        if (($queue = array_get($transformer, 'queued')) === false) {
+            $job = new Jobs\TransformFileUnqueuedJob($this, $name, array_get($transformer, 'transformer'), array_get($transformer, 'config', []));
+        } else {
+            $job = new Jobs\TransformFileQueuedJob($this, $name, array_get($transformer, 'transformer'), array_get($transformer, 'config', []));
+
+            if (is_string($queue)) {
+                $job->onQueue($job);
+            }
+        }
+
+        dispatch($job);
     }
 }

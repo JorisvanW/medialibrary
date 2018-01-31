@@ -1,6 +1,6 @@
 <?php
 
-namespace CipeMotion\Medialibrary\Transformers;
+namespace CipeMotion\Medialibrary\Transformers\Video;
 
 use Image;
 use Storage;
@@ -8,8 +8,9 @@ use CloudConvert\Api;
 use File as Filesystem;
 use CipeMotion\Medialibrary\Entities\File;
 use CipeMotion\Medialibrary\Entities\Transformation;
+use CipeMotion\Medialibrary\Transformers\ITransformer;
 
-class VideoTransformer implements ITransformer
+class VideoToImagePreviewTransformer implements ITransformer
 {
     /**
      * The transformation name.
