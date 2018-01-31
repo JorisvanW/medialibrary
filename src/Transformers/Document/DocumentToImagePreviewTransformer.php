@@ -1,6 +1,6 @@
 <?php
 
-namespace CipeMotion\Medialibrary\Transformers;
+namespace CipeMotion\Medialibrary\Transformers\Document;
 
 use Image;
 use Storage;
@@ -9,9 +9,10 @@ use File as Filesystem;
 use CloudConvert\Exceptions\ApiException;
 use CipeMotion\Medialibrary\Entities\File;
 use CipeMotion\Medialibrary\Entities\Transformation;
+use CipeMotion\Medialibrary\Transformers\ITransformer;
 use CloudConvert\Exceptions\ApiConversionFailedException;
 
-class DocumentTransformer implements ITransformer
+class DocumentToImagePreviewTransformer implements ITransformer
 {
     /**
      * The transformation name.
@@ -64,9 +65,9 @@ class DocumentTransformer implements ITransformer
             'input'            => 'download',
             'wait'             => true,
             'file'             => $file->downloadUrl,
-            'converteroptions' => [
+            'converteroptions' => array_get($this->config, 'converteroptions', [
                 'page_range' => '1-1',
-            ],
+            ]),
         ];
 
         if (!is_null(config('services.cloudconvert.timeout'))) {

@@ -1,6 +1,6 @@
 <?php
 
-namespace CipeMotion\Medialibrary\Transformers;
+namespace CipeMotion\Medialibrary\Transformers\Image;
 
 use Intervention\Image\Constraint;
 use Intervention\Image\Facades\Image;
@@ -8,8 +8,9 @@ use Illuminate\Support\Facades\Storage;
 use CipeMotion\Medialibrary\Entities\File;
 use Illuminate\Support\Facades\File as Filesystem;
 use CipeMotion\Medialibrary\Entities\Transformation;
+use CipeMotion\Medialibrary\Transformers\ITransformer;
 
-class ResizeTransformer implements ITransformer
+class ResizeImageTransformer implements ITransformer
 {
     /**
      * The transformation name.

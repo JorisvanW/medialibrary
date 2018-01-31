@@ -107,7 +107,7 @@ return [
 
             'thumb' => [
 
-                'transformer' => CipeMotion\Medialibrary\Transformers\ResizeTransformer::class,
+                'transformer' => CipeMotion\Medialibrary\Transformers\Image\ResizeImageTransformer::class,
 
                 'queued' => false,
 
@@ -134,7 +134,7 @@ return [
 
                 'default' => [
 
-                    'transformer' => CipeMotion\Medialibrary\Transformers\ResizeTransformer::class,
+                    'transformer' => CipeMotion\Medialibrary\Transformers\Image\ResizeImageTransformer::class,
 
                     'queued' => true,
 
@@ -207,7 +207,7 @@ return [
 
                 'default' => [
 
-                    'transformer' => CipeMotion\Medialibrary\Transformers\VideoTransformer::class,
+                    'transformer' => CipeMotion\Medialibrary\Transformers\Video\VideoToImagePreviewTransformer::class,
 
                     'queued' => true,
 
@@ -321,7 +321,7 @@ return [
 
             'thumb' => [
 
-                'transformer' => CipeMotion\Medialibrary\Transformers\DocumentTransformer::class,
+                'transformer' => CipeMotion\Medialibrary\Transformers\Document\DocumentToImagePreviewTransformer::class,
 
                 'queued' => true,
 
