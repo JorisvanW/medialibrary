@@ -603,16 +603,24 @@ class File extends Model
             $file->name = str_replace(".{$upload->getClientOriginalExtension()}", '', $upload->getClientOriginalName());
         }
 
-        // Extract the mimetype from the file
-        $mimeType = array_get($attributes, 'client_mime', false) === true ? $upload->getClientMimeType() : $upload->getMimeType();
+        // Start with an empty file type and mime
+        $type     = null;
+        $mimeType = null;
 
-        // Check if we are allowed to fallback to the client mime
-        if ($mimeType === null && array_get($attributes, 'client_mime', false) === false && array_get($attributes, 'client_mime_fallback', true) === true) {
-            $mimeType = $upload->getClientMimeType();
+        // Find the mime type using the client mime if we are allowed to do that
+        if (array_get($attributes, 'client_mime', false) === true) {
+            $type = self::getTypeForMime($mimeType = $upload->getClientMimeType());
         }
 
-        // Extract the type from the mime of the file
-        $type = self::getTypeForMime($mimeType);
+        // If we could not find a file type use the actual mime type by the server
+        if ($type === null) {
+            $type = self::getTypeForMime($mimeType = $upload->getMimeType());
+        }
+
+        // If we could not find a mime type use the client mime (unless we already tried)
+        if ($type === null && array_get($attributes, 'client_mime', false) === false && array_get($attributes, 'client_mime_fallback', true) === true) {
+            $type = self::getTypeForMime($mimeType = $upload->getClientMimeType());
+        }
 
         // Abort if we cannot find a valid type, this file is probably not allowed
         if ($type === null) {
