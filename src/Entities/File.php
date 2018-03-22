@@ -632,6 +632,11 @@ class File extends Model
             /** @var \Intervention\Image\Image $image */
             $image = Image::make($upload);
 
+            if (array_get($attributes, 'orientate', true)) {
+                $image = $image->orientate();
+                $image->save();
+            }
+
             $file->width  = $image->getWidth();
             $file->height = $image->getHeight();
 
