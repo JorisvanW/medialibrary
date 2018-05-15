@@ -4,6 +4,18 @@ namespace CipeMotion\Medialibrary\Entities;
 
 use Illuminate\Database\Eloquent\Model;
 
+/**
+ * @property string                                 name
+ * @property string                                 type
+ * @property \CipeMotion\Medialibrary\Entities\File file
+ * @property int                                    size
+ * @property int                                    width
+ * @property int                                    height
+ * @property bool                                   filename
+ * @property string                                 mime_type
+ * @property string                                 extension
+ * @property bool                                   completed
+ */
 class Transformation extends Model
 {
     /**
@@ -19,7 +31,7 @@ class Transformation extends Model
      * @var array
      */
     protected $fillable = [
-        'name'
+        'name',
     ];
 
     /**
@@ -35,7 +47,7 @@ class Transformation extends Model
         'type',
         'url',
         'created_at',
-        'updated_at'
+        'updated_at',
     ];
 
     /**
@@ -44,7 +56,7 @@ class Transformation extends Model
      * @var array
      */
     protected $appends = [
-        'url'
+        'url',
     ];
 
     /**

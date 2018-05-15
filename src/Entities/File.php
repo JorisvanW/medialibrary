@@ -14,6 +14,27 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Builder;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 
+/**
+ * @property string                                   id
+ * @property string                                   type
+ * @property string                                   disk
+ * @property int                                      size
+ * @property string                                   name
+ * @property string|null                              group
+ * @property int                                      width
+ * @property int                                      height
+ * @property string|null                              caption
+ * @property string|int|null                          user_id
+ * @property string                                   filename
+ * @property string|int|null                          owner_id
+ * @property string                                   mime_type
+ * @property bool                                     is_hidden
+ * @property string                                   extension
+ * @property bool                                     completed
+ * @property \Illuminate\Database\Eloquent\Collection attachables
+ * @property int|null                                 category_id
+ * @property \Illuminate\Database\Eloquent\Collection transformations
+ */
 class File extends Model
 {
     /**
@@ -79,6 +100,13 @@ class File extends Model
      * @var \CipeMotion\Medialibrary\Generators\IUrlGenerator
      */
     protected $generator = null;
+
+    /**
+     * The PATH generator instance for this file.
+     *
+     * @var \CipeMotion\Medialibrary\Generators\IPathGenerator
+     */
+    protected $pathGenerator = null;
 
     /**
      * The local path to the file, used for transformations.
@@ -204,15 +232,15 @@ class File extends Model
     {
         if (empty($this->localPath)) {
             if ($this->isDiskLocal($this->disk)) {
-                $localPath = config("filesystems.disks.{$this->disk}.root") . "/{$this->id}/upload.{$this->extension}";
+                $localPath = config("filesystems.disks.{$this->disk}.root") . '/' . $this->getPath();
 
-                if (!is_null($path)) {
+                if (null !== $path) {
                     copy($localPath, $path);
                 }
 
-                $this->setLocalPath(is_null($path) ? $localPath : $path);
+                $this->setLocalPath(null === $path ? $localPath : $path);
             } else {
-                $temp = is_null($path) ? get_temp_path() : $path;
+                $temp = null === $path ? get_temp_path() : $path;
 
                 copy($this->getDownloadUrlAttribute(), $temp);
 
@@ -234,6 +262,18 @@ class File extends Model
     }
 
     /**
+     * Get the path.
+     *
+     * @param \CipeMotion\Medialibrary\Entities\Transformation|null $transformation
+     *
+     * @return string
+     */
+    public function getPath(Transformation $transformation = null)
+    {
+        return $this->getPathGenerator()->getPathForTransformation($this, $transformation);
+    }
+
+    /**
      * Get the url.
      *
      * @param string|null $transformation
@@ -250,15 +290,15 @@ class File extends Model
             /** @var \CipeMotion\Medialibrary\Entities\Transformation|null $transformation */
             $transformation = $this->transformations->where('name', $transformation)->where('completed', 1)->first();
 
-            if (is_null($transformation)) {
+            if (null === $transformation) {
                 if (!empty(config("medialibrary.file_types.{$this->type}.thumb.defaults.{$transformationName}"))) {
                     return config("medialibrary.file_types.{$this->type}.thumb.defaults.{$transformationName}");
-                } else {
-                    return null;
                 }
+
+                return null;
             }
 
-            if (!is_null($transformation) && !$transformation->completed) {
+            if (null !== $transformation && !$transformation->completed) {
                 $transformation = null;
             }
         }
@@ -293,7 +333,7 @@ class File extends Model
      */
     public function getNameAttribute()
     {
-        if (!is_null($this->attributes['name'])) {
+        if (null !== $this->attributes['name']) {
             return $this->attributes['name'];
         }
 
@@ -365,11 +405,11 @@ class File extends Model
      */
     public function getPreviewIsProcessingAttribute()
     {
-        if (in_array($this->type, [FileTypes::TYPE_IMAGE, FileTypes::TYPE_DOCUMENT, FileTypes::TYPE_VIDEO]) && is_null($this->getPreviewFullAttribute())) {
+        if (in_array($this->type, [FileTypes::TYPE_IMAGE, FileTypes::TYPE_DOCUMENT, FileTypes::TYPE_VIDEO], true) && null === $this->getPreviewFullAttribute()) {
             $transformationName = $this->type === FileTypes::TYPE_IMAGE ? 'thumb' : 'preview';
             $transformation     = $this->transformations->where('name', $transformationName)->first();
 
-            if (!is_null($transformation) && !$transformation->isCompleted) {
+            if (null !== $transformation && !$transformation->isCompleted) {
                 return true;
             }
         }
@@ -429,7 +469,7 @@ class File extends Model
      */
     public function owner()
     {
-        if (is_null(config('medialibrary.relations.owner.model'))) {
+        if (null === config('medialibrary.relations.owner.model')) {
             throw new Exception('Medialibrary: owner relation is not set in medialibrary.php');
         }
 
@@ -444,7 +484,7 @@ class File extends Model
      */
     public function user()
     {
-        if (is_null(config('medialibrary.relations.user.model'))) {
+        if (null === config('medialibrary.relations.user.model')) {
             throw new Exception('Medialibrary: user relation is not set in medialibrary.php');
         }
 
@@ -488,7 +528,7 @@ class File extends Model
      */
     protected function getUrlGenerator()
     {
-        if (is_null($this->generator)) {
+        if (null === $this->generator) {
             $generatorClass = config('medialibrary.generator.url');
 
             $this->generator = new $generatorClass(config("filesystems.disks.{$this->disk}"));
@@ -498,19 +538,35 @@ class File extends Model
     }
 
     /**
+     * Get the path generator for this file.
+     *
+     * @return \CipeMotion\Medialibrary\Generators\IPathGenerator
+     */
+    protected function getPathGenerator()
+    {
+        if (null === $this->pathGenerator) {
+            $generatorClass = config('medialibrary.generator.path');
+
+            $this->pathGenerator = new $generatorClass(config("filesystems.disks.{$this->disk}"));
+        }
+
+        return $this->pathGenerator;
+    }
+
+    /**
      * Get the group attribute.
      *
      * @return array
      */
     public function getGroupTransformations()
     {
-        if (is_null($this->groupTransformationsCache)) {
+        if (null === $this->groupTransformationsCache) {
             $transformers      = config("medialibrary.file_types.{$this->attributes['type']}.transformations");
             $transformerGroups = config("medialibrary.file_types.{$this->attributes['type']}.transformationGroups");
 
             // Check if we have transformation group else use default
             $group            = isset($this->attributes['group']) ? $this->attributes['group'] : null;
-            $transformerGroup = array_get($transformerGroups, is_null($group) || !array_has($transformerGroups, $group) ? 'default' : $group, []);
+            $transformerGroup = array_get($transformerGroups, null === $group || !array_has($transformerGroups, $group) ? 'default' : $group, []);
 
             // Transformations array with default thumb generator
             $transformations = [
@@ -523,7 +579,7 @@ class File extends Model
             }
 
             $this->groupTransformationsCache = array_filter($transformations, function ($transformer) {
-                return !is_null($transformer);
+                return null !== $transformer;
             });
         }
 
@@ -544,7 +600,7 @@ class File extends Model
         foreach ($types as $type => $data) {
             $allowed = array_flatten(array_values(array_get($data, 'mimes')));
 
-            if (in_array($mime, $allowed)) {
+            if (in_array($mime, $allowed, true)) {
                 return $type;
             }
         }
@@ -575,21 +631,21 @@ class File extends Model
         $file->id = Uuid::uuid4()->toString();
 
         // Retrieve the disk from the config unless it's given to us
-        $disk = is_null($disk) ? call_user_func(config('medialibrary.disk')) : $disk;
+        $disk = null === $disk ? call_user_func(config('medialibrary.disk')) : $disk;
 
         // Check if we need to resolve the owner
-        if ($owner === false && !is_null(config('medialibrary.relations.owner.model'))) {
+        if ($owner === false && null !== config('medialibrary.relations.owner.model')) {
             $owner = call_user_func(config('medialibrary.relations.owner.resolver'));
         }
 
         // Check if we need to resolve the user
-        if ($user === false && !is_null(config('medialibrary.relations.user.model'))) {
+        if ($user === false && null !== config('medialibrary.relations.user.model')) {
             $user = call_user_func(config('medialibrary.relations.user.resolver'));
         }
 
         // Attach the owner & user if supplied
-        $file->owner_id = (is_null($owner) || $owner === false) ? null : $owner->getKey();
-        $file->user_id  = (is_null($user) || $user === false) ? null : $user->getKey();
+        $file->owner_id = (null === $owner || $owner === false) ? null : $owner->getKey();
+        $file->user_id  = (null === $user || $user === false) ? null : $user->getKey();
 
         // Fill in the fields from the attributes
         $file->group       = (!empty($group = array_get($attributes, 'group'))) ? $group : null;
@@ -659,7 +715,7 @@ class File extends Model
         $stream = fopen($upload->getRealPath(), 'rb');
 
         // Use Laravel' storage engine to store our file on a disk
-        $success = Storage::disk($disk)->put("{$file->id}/upload.{$file->extension}", $stream);
+        $success = Storage::disk($disk)->put($file->getPath(), $stream);
 
         // Close the resource handle if we need to
         if (is_resource($stream)) {

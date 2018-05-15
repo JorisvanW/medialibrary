@@ -6,6 +6,10 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 
+/**
+ * @property int      order
+ * @property int|null parent_id
+ */
 class Category extends Model
 {
     /**
@@ -21,7 +25,7 @@ class Category extends Model
      * @var array
      */
     protected $fillable = [
-        'name'
+        'name',
     ];
 
     /**
@@ -30,7 +34,7 @@ class Category extends Model
      * @var array
      */
     protected $visible = [
-        'name'
+        'name',
     ];
 
     // Scopes
@@ -55,12 +59,11 @@ class Category extends Model
     // Relations
     public function parent()
     {
-        return $this->belongsTo(Category::class);
+        return $this->belongsTo(self::class);
     }
     public function childs()
     {
-        return $this->hasMany(Category::class, 'parent_id')
-                    ->orderBy('order', 'ASC');
+        return $this->hasMany(self::class, 'parent_id')->orderBy('order', 'ASC');
     }
 
     // Helpers
@@ -73,7 +76,7 @@ class Category extends Model
             $category = $collection->find(array_get($parent, 'id', 0));
             $children = array_get($parent, 'children', []);
 
-            if (!is_null($category)) {
+            if (null !== $category) {
                 $category->order     = $order;
                 $category->parent_id = null;
                 $category->save();
@@ -85,17 +88,17 @@ class Category extends Model
                         /** @var \CipeMotion\Medialibrary\Entities\Category $childCategory */
                         $childCategory = $collection->find(array_get($child, 'id', 0));
 
-                        if (!is_null($childCategory)) {
+                        if (null !== $childCategory) {
                             $childCategory->order     = $childOrder;
                             $childCategory->parent_id = $category->id;
                             $childCategory->save();
 
-                            $childOrder ++;
+                            $childOrder++;
                         }
                     }
                 }
 
-                $order ++;
+                $order++;
             }
         }
     }

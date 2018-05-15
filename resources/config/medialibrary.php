@@ -16,6 +16,8 @@ return [
 
         'url' => CipeMotion\Medialibrary\Generators\AzureUrlGenerator::class,
 
+        'path' => CipeMotion\Medialibrary\Generators\PathGenerator::class,
+
     ],
 
     /*
