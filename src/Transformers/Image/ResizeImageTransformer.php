@@ -107,9 +107,9 @@ class ResizeImageTransformer implements ITransformer
 
         // Either overwrite the original uploaded file or write to the transformation path
         if (array_get($this->config, 'default', false)) {
-            $disk->put("{$file->id}/upload.{$transformation->extension}", $stream);
+            $disk->put($file->getPath(null), $stream);
         } else {
-            $disk->put("{$file->id}/{$transformation->name}.{$transformation->extension}", $stream);
+            $disk->put($file->getPath($transformation), $stream);
         }
 
         // Close the stream again
@@ -118,12 +118,12 @@ class ResizeImageTransformer implements ITransformer
         }
 
         // Cleanup our temp file
-        if (!is_null($destination)) {
+        if (null !== $destination) {
             @unlink($destination);
         }
 
         // Cleanup the local copy of the file
-        if (!is_null($localPath)) {
+        if (null !== $localPath) {
             $file->setLocalPath(null);
 
             @unlink($localPath);
