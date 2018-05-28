@@ -33,6 +33,7 @@ use Symfony\Component\HttpFoundation\File\UploadedFile;
  * @property bool                                     completed
  * @property \Illuminate\Database\Eloquent\Collection attachables
  * @property int|null                                 category_id
+ * @property string                                   download_url
  * @property \Illuminate\Database\Eloquent\Collection transformations
  */
 class File extends Model

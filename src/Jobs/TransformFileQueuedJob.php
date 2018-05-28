@@ -8,5 +8,5 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 
 class TransformFileQueuedJob extends TransformFileJob implements ShouldQueue
 {
-    use InteractsWithQueue, SerializesModels;
+    use Queueable, InteractsWithQueue, SerializesModels;
 }

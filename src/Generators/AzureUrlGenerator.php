@@ -2,6 +2,7 @@
 
 namespace CipeMotion\Medialibrary\Generators;
 
+use RuntimeException;
 use CipeMotion\Medialibrary\FileTypes;
 use CipeMotion\Medialibrary\Entities\File;
 use CipeMotion\Medialibrary\Entities\Transformation;
@@ -33,37 +34,24 @@ class AzureUrlGenerator implements IUrlGenerator
      * @param bool                                                  $fullPreview
      * @param bool                                                  $download
      *
-     * @throws \Exception
      * @return string
      */
-    public function getUrlForTransformation(
-        File $file,
-        Transformation $transformation = null,
-        $fullPreview = false,
-        $download = false
-    ) {
+    public function getUrlForTransformation(File $file, Transformation $transformation = null, $fullPreview = false, $download = false): string
+    {
         if ($download) {
-            throw new \Exception(
-                'The Azure url generator does not support forced download urls.'
-            );
+            throw new RuntimeException('The Azure url generator does not support forced download urls.');
         }
 
-        $account   = array_get($this->config, 'account');
-        $container = array_get($this->config, 'container');
+        $account           = array_get($this->config, 'account');
+        $container         = array_get($this->config, 'container');
+        $tranformationName = $transformation->name ?? 'upload';
+        $extension         = $transformation->extension ?? $file->extension;
 
-        if (empty($transformation)) {
-            $transformation = 'upload';
-            $extension      = $file->extension;
-
-            if ($fullPreview && $file->type !== FileTypes::TYPE_IMAGE) {
-                $transformation = 'preview';
-                $extension      = 'jpg';
-            }
-        } else {
-            $transformation = $transformation->name;
-            $extension      = $transformation->extension;
+        if ($transformation === null && $fullPreview && $file->type !== FileTypes::TYPE_IMAGE) {
+            $tranformationName = 'preview';
+            $extension         = 'jpg';
         }
 
-        return "https://{$account}.blob.core.windows.net/{$container}/{$file->id}/{$transformation}.{$extension}";
+        return "https://{$account}.blob.core.windows.net/{$container}/{$file->id}/{$tranformationName}.{$extension}";
     }
 }
