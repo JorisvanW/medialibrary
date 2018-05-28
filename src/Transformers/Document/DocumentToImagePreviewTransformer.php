@@ -52,9 +52,9 @@ class DocumentToImagePreviewTransformer implements ITransformer
      *
      * @param \CipeMotion\Medialibrary\Entities\File $file
      *
-     * @return Transformation
      * @throws \CloudConvert\Exceptions\ApiException
      * @throws \GuzzleHttp\Exception\GuzzleException
+     * @return Transformation
      */
     public function transform(File $file): Transformation
     {
