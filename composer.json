@@ -34,5 +34,12 @@
             "CipeMotion\\Medialibrary\\": "src"
         }
     },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "CipeMotion\\Medialibrary\\ServiceProvider"
+            ]
+        }
+    },
     "minimum-stability": "stable"
 }
