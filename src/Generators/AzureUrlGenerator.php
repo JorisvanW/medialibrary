@@ -33,8 +33,8 @@ class AzureUrlGenerator implements IUrlGenerator
      * @param bool                                                  $fullPreview
      * @param bool                                                  $download
      *
-     * @return string
      * @throws \Exception
+     * @return string
      */
     public function getUrlForTransformation(
         File $file,

@@ -2,16 +2,15 @@
 
 namespace CipeMotion\Medialibrary;
 
-use Illuminate\Support\ServiceProvider as LaravelServiceProvider;
 use CipeMotion\Medialibrary\Entities\File;
 use CipeMotion\Medialibrary\Observers\FileObserver;
+use Illuminate\Support\ServiceProvider as LaravelServiceProvider;
 
 class ServiceProvider extends LaravelServiceProvider
 {
     /**
      * Perform post-registration booting of services.
      *
-     * @return void
      */
     public function boot()
     {
@@ -29,7 +28,6 @@ class ServiceProvider extends LaravelServiceProvider
     /**
      * Register the service provider.
      *
-     * @return void
      */
     public function register()
     {

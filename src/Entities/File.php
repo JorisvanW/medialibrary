@@ -9,8 +9,8 @@ use RuntimeException;
 use CipeMotion\Medialibrary\Jobs;
 use Intervention\Image\Facades\Image;
 use CipeMotion\Medialibrary\FileTypes;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Database\Eloquent\Builder;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 
@@ -125,8 +125,8 @@ class File extends Model
     /**
      * Handle dynamic method calls into the model.
      *
-     * @param  string $method
-     * @param  array  $parameters
+     * @param string $method
+     * @param array  $parameters
      *
      * @return mixed
      */
@@ -464,8 +464,8 @@ class File extends Model
     /**
      * The file owner.
      *
-     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
      * @throws \Exception
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
      */
     public function owner()
     {
@@ -479,8 +479,8 @@ class File extends Model
     /**
      * The file user.
      *
-     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
      * @throws \Exception
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
      */
     public function user()
     {
