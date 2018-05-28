@@ -2,8 +2,6 @@
 
 namespace CipeMotion\Medialibrary\Entities;
 
-use Image;
-use Storage;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Builder;
 

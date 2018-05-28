@@ -30,8 +30,8 @@ class PathMappedGenerator implements IPathGenerator
      * @param \CipeMotion\Medialibrary\Entities\File                $file
      * @param \CipeMotion\Medialibrary\Entities\Transformation|null $transformation
      *
-     * @return string
      * @throws \Exception
+     * @return string
      */
     public function getPathForTransformation(File $file, Transformation $transformation = null)
     {
