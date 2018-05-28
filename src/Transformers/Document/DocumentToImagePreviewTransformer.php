@@ -2,6 +2,7 @@
 
 namespace CipeMotion\Medialibrary\Transformers\Document;
 
+use Image;
 use CloudConvert\Api;
 use Illuminate\Support\Facades\Storage;
 use CloudConvert\Exceptions\ApiException;
