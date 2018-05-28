@@ -16,6 +16,7 @@
         "aws/aws-sdk-php": "To use the S3PresignedUrlGenerator."
     },
     "require": {
+        "php": ">=7.1",
         "ramsey/uuid": "^3.5",
         "intervention/image": "^2.3",
         "laravel/framework": "5.3.*|5.4.*|5.5.*|5.6.*",

@@ -11,25 +11,25 @@ class FileObserver
 {
     use DispatchesJobs;
 
-    public function creating(File $file)
+    public function creating(File $file): void
     {
-        if (is_null($file->getAttribute('id'))) {
+        if ($file->getAttribute('id') === null) {
             $file->id = Uuid::uuid4()->toString();
         }
     }
 
-    public function created(File $file)
+    public function created(File $file): void
     {
         $groupTransformations = $file->getGroupTransformations();
 
-        if (count($groupTransformations)) {
+        if (\count($groupTransformations)) {
             foreach (array_keys($groupTransformations) as $name) {
                 $file->requestTransformation($name);
             }
         }
     }
 
-    public function deleted(File $file)
+    public function deleted(File $file): void
     {
         $this->dispatch(new DeleteFileJob($file->id, $file->disk));
     }

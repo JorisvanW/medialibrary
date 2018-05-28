@@ -2,12 +2,11 @@
 
 namespace CipeMotion\Medialibrary\Transformers\Document;
 
-use Image;
-use Storage;
 use CloudConvert\Api;
-use File as Filesystem;
+use Illuminate\Support\Facades\Storage;
 use CloudConvert\Exceptions\ApiException;
 use CipeMotion\Medialibrary\Entities\File;
+use Illuminate\Support\Facades\File as Filesystem;
 use CipeMotion\Medialibrary\Entities\Transformation;
 use CipeMotion\Medialibrary\Transformers\ITransformer;
 use CloudConvert\Exceptions\ApiConversionFailedException;
@@ -53,9 +52,11 @@ class DocumentToDocumentTransformer implements ITransformer
      *
      * @param \CipeMotion\Medialibrary\Entities\File $file
      *
-     * @return \CipeMotion\Medialibrary\Entities\Transformation
+     * @return Transformation
+     * @throws \CloudConvert\Exceptions\ApiException
+     * @throws \GuzzleHttp\Exception\GuzzleException
      */
-    public function transform(File $file)
+    public function transform(File $file): Transformation
     {
         $extension = array_get($this->config, 'extension', 'pdf');
 
@@ -64,11 +65,11 @@ class DocumentToDocumentTransformer implements ITransformer
             'outputformat'     => $extension,
             'input'            => 'download',
             'wait'             => true,
-            'file'             => $file->downloadUrl,
+            'file'             => $file->download_url,
             'converteroptions' => array_get($this->config, 'converteroptions', []),
         ];
 
-        if (!is_null(config('services.cloudconvert.timeout'))) {
+        if (config('services.cloudconvert.timeout') !== null) {
             $cloudconvertSettings['timeout'] = config('services.cloudconvert.timeout');
         }
 
@@ -92,7 +93,7 @@ class DocumentToDocumentTransformer implements ITransformer
             // So if we could not convert the file we ingore this transformation
             // The file is probably corrupt or unsupported or has some other shenanigans
             // The other exceptions are retryable so we fail and try again later
-            if (!is_null($destination)) {
+            if ($destination !== null) {
                 @unlink($destination);
             }
         }
@@ -103,7 +104,7 @@ class DocumentToDocumentTransformer implements ITransformer
                 $convert->delete();
             } catch (ApiException $e) {
                 // If we could not delete, meh, it's probably already gone then
-                if (!is_null($destination)) {
+                if ($destination !== null) {
                     @unlink($destination);
                 }
             }
@@ -114,32 +115,34 @@ class DocumentToDocumentTransformer implements ITransformer
             return null;
         }
 
-        // Get the disk and a stream from the cropped image location
-        $disk   = Storage::disk($file->disk);
-        $stream = fopen($destination, 'rb');
-
-        // Upload the preview
-        $disk->put("{$file->id}/{$this->name}.{$extension}", $stream);
-
-        // Cleanup our streams
-        if (is_resource($stream)) {
-            fclose($stream);
-        }
-
         // Build the transformation
         $transformation            = new Transformation;
         $transformation->name      = $this->name;
-        $transformation->size      = Filesystem::size($destination);
         $transformation->mime_type = $mimetype;
         $transformation->type      = File::getTypeForMime($transformation->mime_type);
         $transformation->extension = $extension;
         $transformation->completed = true;
 
+        // Get the disk and a stream from the cropped image location
+        $disk   = Storage::disk($file->disk);
+        $stream = fopen($destination, 'rb');
+
+        // Upload the preview
+        $disk->put($file->getPath($transformation), $stream);
+
+        // Cleanup our streams
+        if (\is_resource($stream)) {
+            fclose($stream);
+        }
+
+        // Retrieve the size from the filesystem
+        $transformation->size = Filesystem::size($destination);
+
         // Store the preview
         $file->transformations()->save($transformation);
 
         // Cleanup our temp file
-        if (!is_null($destination)) {
+        if ($destination !== null) {
             @unlink($destination);
         }
 

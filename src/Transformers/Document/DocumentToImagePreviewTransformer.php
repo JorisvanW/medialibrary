@@ -2,12 +2,11 @@
 
 namespace CipeMotion\Medialibrary\Transformers\Document;
 
-use Image;
-use Storage;
 use CloudConvert\Api;
-use File as Filesystem;
+use Illuminate\Support\Facades\Storage;
 use CloudConvert\Exceptions\ApiException;
 use CipeMotion\Medialibrary\Entities\File;
+use Illuminate\Support\Facades\File as Filesystem;
 use CipeMotion\Medialibrary\Entities\Transformation;
 use CipeMotion\Medialibrary\Transformers\ITransformer;
 use CloudConvert\Exceptions\ApiConversionFailedException;
@@ -53,9 +52,11 @@ class DocumentToImagePreviewTransformer implements ITransformer
      *
      * @param \CipeMotion\Medialibrary\Entities\File $file
      *
-     * @return \CipeMotion\Medialibrary\Entities\Transformation
+     * @return Transformation
+     * @throws \CloudConvert\Exceptions\ApiException
+     * @throws \GuzzleHttp\Exception\GuzzleException
      */
-    public function transform(File $file)
+    public function transform(File $file): Transformation
     {
         $extension = array_get($this->config, 'extension', 'jpg');
 
@@ -64,13 +65,13 @@ class DocumentToImagePreviewTransformer implements ITransformer
             'outputformat'     => $extension,
             'input'            => 'download',
             'wait'             => true,
-            'file'             => $file->downloadUrl,
+            'file'             => $file->download_url,
             'converteroptions' => array_get($this->config, 'converteroptions', [
                 'page_range' => '1-1',
             ]),
         ];
 
-        if (!is_null(config('services.cloudconvert.timeout'))) {
+        if (config('services.cloudconvert.timeout') !== null) {
             $cloudconvertSettings['timeout'] = config('services.cloudconvert.timeout');
         }
 
@@ -90,7 +91,7 @@ class DocumentToImagePreviewTransformer implements ITransformer
             // So if we could not convert the file we ingore this transformation
             // The file is probably corrupt or unsupported or has some other shenanigans
             // The other exceptions are retryable so we fail and try again later
-            if (!is_null($destination)) {
+            if ($destination !== null) {
                 @unlink($destination);
             }
         }
@@ -101,7 +102,7 @@ class DocumentToImagePreviewTransformer implements ITransformer
                 $convert->delete();
             } catch (ApiException $e) {
                 // If we could not delete, meh, it's probably already gone then
-                if (!is_null($destination)) {
+                if ($destination !== null) {
                     @unlink($destination);
                 }
             }
@@ -120,7 +121,7 @@ class DocumentToImagePreviewTransformer implements ITransformer
         $disk->put("{$file->id}/preview.{$extension}", $stream);
 
         // Cleanup our streams
-        if (is_resource($stream)) {
+        if (\is_resource($stream)) {
             fclose($stream);
         }
 
@@ -190,15 +191,15 @@ class DocumentToImagePreviewTransformer implements ITransformer
         $stream = fopen($destination, 'rb');
 
         // Upload the preview
-        $disk->put("{$file->id}/{$transformation->name}.{$transformation->extension}", $stream);
+        $disk->put($file->getPath($transformation), $stream);
 
         // Cleanup our streams
-        if (is_resource($stream)) {
+        if (\is_resource($stream)) {
             fclose($stream);
         }
 
         // Cleanup our temp file
-        if (!is_null($destination)) {
+        if ($destination !== null) {
             @unlink($destination);
         }
 

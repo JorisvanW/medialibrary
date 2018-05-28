@@ -3,6 +3,7 @@
 namespace CipeMotion\Medialibrary\Transformers;
 
 use CipeMotion\Medialibrary\Entities\File;
+use CipeMotion\Medialibrary\Entities\Transformation;
 
 interface ITransformer
 {
@@ -21,5 +22,5 @@ interface ITransformer
      *
      * @return \CipeMotion\Medialibrary\Entities\Transformation
      */
-    public function transform(File $file);
+    public function transform(File $file): Transformation;
 }
