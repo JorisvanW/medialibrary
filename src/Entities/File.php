@@ -753,11 +753,19 @@ class File extends Model
 
         $filePath = Storage::disk('medialibrary_temp')->makeDirectory($filePathDir);
 
-        $filePathName = $filePathDir . '/'. array_get($data, 'name');
+        $filePathName = $filePathDir . '/' . array_get($data, 'name');
 
         $filePath = Storage::disk('medialibrary_temp')->path($filePathName);
 
-        if (copy(array_get($data, 'url'), $filePath) && Storage::disk('medialibrary_temp')->exists($filePathName)) {
+        if (!is_null($accessToken = array_get($data, 'accessToken'))) {
+            $context = stream_context_create(['http' => ['header' => "Authorization: Bearer $accessToken"]]);
+
+            $fileCreated = file_put_contents($filePath, file_get_contents(array_get($data, 'url'), false, $context));
+        } else {
+            $fileCreated = copy(array_get($data, 'url'), $filePath);
+        }
+
+        if ($fileCreated && Storage::disk('medialibrary_temp')->exists($filePathName)) {
             $result = self::uploadFile(new UploadedFile($filePath, array_get($data, 'name')), $attributes, $disk, $owner, $user);
 
             Storage::disk('medialibrary_temp')->deleteDir($filePathDir);
