@@ -751,7 +751,7 @@ class File extends Model
     {
         $filePathDir = Uuid::uuid4()->toString();
 
-        $filePath = Storage::disk('medialibrary_temp')->makeDirectory($filePathDir);
+        Storage::disk('medialibrary_temp')->makeDirectory($filePathDir);
 
         $filePathName = $filePathDir . '/' . array_get($data, 'name');
 
@@ -760,20 +760,20 @@ class File extends Model
         if (!is_null($accessToken = array_get($data, 'accessToken'))) {
             $context = stream_context_create(['http' => ['header' => "Authorization: Bearer $accessToken"]]);
 
-            $fileCreated = file_put_contents($filePath, file_get_contents(array_get($data, 'url'), false, $context));
+            $fileCreated = copy(array_get($data, 'url'), $filePath, $context);
         } else {
             $fileCreated = copy(array_get($data, 'url'), $filePath);
         }
 
+        $result = false;
+
         if ($fileCreated && Storage::disk('medialibrary_temp')->exists($filePathName)) {
             $result = self::uploadFile(new UploadedFile($filePath, array_get($data, 'name')), $attributes, $disk, $owner, $user);
-
-            Storage::disk('medialibrary_temp')->deleteDir($filePathDir);
-
-            return $result;
         }
 
-        return false;
+        Storage::disk('medialibrary_temp')->deleteDir($filePathDir);
+
+        return $result;
     }
 
     /**
