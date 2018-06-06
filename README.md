@@ -60,12 +60,3 @@ public function attachebles()
     return $this->morphToMany(\CipeMotion\Medialibrary\Entities\File::class, 'attachable', 'medialibrary_attachable');
 }
 ```
-
-
-### Services (external file pickers)
-
-#### DropBox
-
-#### OneDrive
-
-#### Google Drive
