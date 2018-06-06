@@ -749,29 +749,24 @@ class File extends Model
      */
     public static function uploadExternalFile(array $data, array $attributes = [], $disk = null, $owner = false, $user = false)
     {
-        $filePathDir = Uuid::uuid4()->toString();
-
-        Storage::disk('medialibrary_temp')->makeDirectory($filePathDir);
-
-        $filePathName = $filePathDir . '/' . array_get($data, 'name');
-
-        $filePath = Storage::disk('medialibrary_temp')->path($filePathName);
+        $tempFile     = Uuid::uuid4()->toString() . '.tmp';
+        $tempFilePath = Storage::disk('medialibrary_temp')->path($tempFile);
 
         if (!is_null($accessToken = array_get($data, 'accessToken'))) {
             $context = stream_context_create(['http' => ['header' => "Authorization: Bearer $accessToken"]]);
 
-            $fileCreated = copy(array_get($data, 'url'), $filePath, $context);
+            $fileCreated = copy(array_get($data, 'url'), $tempFilePath, $context);
         } else {
-            $fileCreated = copy(array_get($data, 'url'), $filePath);
+            $fileCreated = copy(array_get($data, 'url'), $tempFilePath);
         }
 
         $result = false;
 
-        if ($fileCreated && Storage::disk('medialibrary_temp')->exists($filePathName)) {
-            $result = self::uploadFile(new UploadedFile($filePath, array_get($data, 'name')), $attributes, $disk, $owner, $user);
+        if ($fileCreated && Storage::disk('medialibrary_temp')->exists($tempFile)) {
+            $result = self::uploadFile(new UploadedFile($tempFilePath, array_get($data, 'name')), $attributes, $disk, $owner, $user);
         }
 
-        Storage::disk('medialibrary_temp')->deleteDir($filePathDir);
+        Storage::disk('medialibrary_temp')->delete($tempFilePath);
 
         return $result;
     }
