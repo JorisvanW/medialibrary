@@ -2,11 +2,10 @@
 
 namespace CipeMotion\Medialibrary\Transformers\Video;
 
-use Image;
-use Storage;
 use CloudConvert\Api;
-use File as Filesystem;
+use Illuminate\Support\Facades\Storage;
 use CipeMotion\Medialibrary\Entities\File;
+use Illuminate\Support\Facades\File as Filesystem;
 use CipeMotion\Medialibrary\Entities\Transformation;
 use CipeMotion\Medialibrary\Transformers\ITransformer;
 
@@ -51,9 +50,11 @@ class VideoToImagePreviewTransformer implements ITransformer
      *
      * @param \CipeMotion\Medialibrary\Entities\File $file
      *
-     * @return \CipeMotion\Medialibrary\Entities\Transformation
+     * @throws \CloudConvert\Exceptions\ApiException
+     * @throws \GuzzleHttp\Exception\GuzzleException
+     * @return Transformation
      */
-    public function transform(File $file)
+    public function transform(File $file): Transformation
     {
         // Extract config options
         $extension       = array_get($this->config, 'extension', 'mp4');
@@ -139,13 +140,13 @@ class VideoToImagePreviewTransformer implements ITransformer
 
         // Either overwrite the original uploaded file or write to the transformation path
         if (array_get($this->config, 'default', false)) {
-            $disk->put("{$file->id}/upload.{$transformation->extension}", $stream);
-
             if ($transformation->extension !== $file->extension) {
-                $disk->delete("{$file->id}/upload.{$file->extension}");
+                $disk->delete($file->getPath());
             }
+
+            $disk->put($file->getPath(), $stream);
         } else {
-            $disk->put("{$file->id}/{$transformation->name}.{$transformation->extension}", $stream);
+            $disk->put($file->getPath($transformation), $stream);
         }
 
         // Save the preview and thumb transformations
@@ -153,7 +154,7 @@ class VideoToImagePreviewTransformer implements ITransformer
         $file->transformations()->save($preview);
 
         // Close the stream again
-        if (is_resource($stream)) {
+        if (\is_resource($stream)) {
             fclose($stream);
         }
 
@@ -170,7 +171,7 @@ class VideoToImagePreviewTransformer implements ITransformer
      *
      * @param \CipeMotion\Medialibrary\Entities\File $file
      *
-     * @return array|\CipeMotion\Medialibrary\Entities\Transformation|\CloudConvert\Process
+     * @return array|Transformation|\CloudConvert\Process
      */
     private function generateThumbAndRetrieveFileInfo(File $file)
     {
@@ -182,7 +183,7 @@ class VideoToImagePreviewTransformer implements ITransformer
             'mode'             => 'info',
             'wait'             => true,
             'input'            => 'download',
-            'file'             => $file->downloadUrl,
+            'file'             => $file->download_url,
             'converteroptions' => [
                 'thumbnail_format' => 'jpg',
                 'thumbnail_size'   => "{$previewWidth}x",
@@ -211,7 +212,7 @@ class VideoToImagePreviewTransformer implements ITransformer
         $disk->put("{$file->id}/preview.jpg", $stream);
 
         // Cleanup our streams
-        if (is_resource($stream)) {
+        if (\is_resource($stream)) {
             fclose($stream);
         }
 
@@ -279,15 +280,15 @@ class VideoToImagePreviewTransformer implements ITransformer
         $stream = fopen($destination, 'rb');
 
         // Upload the preview
-        $disk->put("{$file->id}/{$thumb->name}.{$thumb->extension}", $stream);
+        $disk->put($file->getPath($thumb), $stream);
 
         // Cleanup our streams
-        if (is_resource($stream)) {
+        if (\is_resource($stream)) {
             fclose($stream);
         }
 
         // Cleanup our temp file
-        if (!is_null($destination)) {
+        if ($destination !== null) {
             @unlink($destination);
         }
 

@@ -12,6 +12,7 @@ use Illuminate\Database\Eloquent\Model;
  * @property int                                    width
  * @property int                                    height
  * @property bool                                   filename
+ * @property int                                    raw_size
  * @property string                                 mime_type
  * @property string                                 extension
  * @property bool                                   completed

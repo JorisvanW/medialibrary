@@ -53,25 +53,16 @@ class S3PresignedUrlGenerator implements IUrlGenerator
      *
      * @return string
      */
-    public function getUrlForTransformation(
-        File $file,
-        Transformation $transformation = null,
-        $fullPreview = false,
-        $download = false
-    ) {
-        if (empty($transformation)) {
-            $tranformationName = 'upload';
-            $extension         = $file->extension;
-            $mime              = $file->mime;
+    public function getUrlForTransformation(File $file, Transformation $transformation = null, $fullPreview = false, $download = false): string
+    {
+        $tranformationName = $transformation->name ?? 'upload';
+        $extension         = $transformation->extension ?? $file->extension;
+        $mime              = $transformation->mime_type ?? $file->mime_type;
 
-            if ($fullPreview && $file->type !== FileTypes::TYPE_IMAGE) {
-                $tranformationName = 'preview';
-                $extension         = 'jpg';
-            }
-        } else {
-            $tranformationName = $transformation->name;
-            $extension         = $transformation->extension;
-            $mime              = $transformation->mime;
+        if ($transformation === null && $fullPreview && $file->type !== FileTypes::TYPE_IMAGE) {
+            $tranformationName = 'preview';
+            $extension         = 'jpg';
+            $mime              = 'image/jpeg';
         }
 
         $commandParams = [

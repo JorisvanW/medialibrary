@@ -31,14 +31,9 @@ class PathMappedGenerator implements IPathGenerator
      * @param \CipeMotion\Medialibrary\Entities\Transformation|null $transformation
      *
      * @return string
-     * @throws \Exception
      */
-    public function getPathForTransformation(File $file, Transformation $transformation = null)
+    public function getPathForTransformation(File $file, Transformation $transformation = null): string
     {
-        if (null === $transformation) {
-            return "{$file->id}/upload/{$file->filename}.{$file->extension}";
-        }
-
-        return "{$file->id}/{$transformation->name}/{$file->filename}.{$transformation->extension}";
+        return $transformation === null ? "{$file->id}/upload/{$file->filename}.{$file->extension}" : "{$file->id}/{$transformation->name}/{$file->filename}.{$transformation->extension}";
     }
 }

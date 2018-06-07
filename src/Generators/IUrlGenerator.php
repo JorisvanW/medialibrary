@@ -24,10 +24,5 @@ interface IUrlGenerator
      *
      * @return string
      */
-    public function getUrlForTransformation(
-        File $file,
-        Transformation $transformation = null,
-        $fullPreview = false,
-        $download = false
-    );
+    public function getUrlForTransformation(File $file, Transformation $transformation = null, $fullPreview = false, $download = false): string;
 }

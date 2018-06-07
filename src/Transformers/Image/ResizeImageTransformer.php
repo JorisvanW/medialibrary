@@ -43,9 +43,9 @@ class ResizeImageTransformer implements ITransformer
      *
      * @param \CipeMotion\Medialibrary\Entities\File $file
      *
-     * @return \CipeMotion\Medialibrary\Entities\Transformation
+     * @return Transformation
      */
-    public function transform(File $file)
+    public function transform(File $file): Transformation
     {
         // Get a temp path to work with
         $destination = get_temp_path();
@@ -107,23 +107,23 @@ class ResizeImageTransformer implements ITransformer
 
         // Either overwrite the original uploaded file or write to the transformation path
         if (array_get($this->config, 'default', false)) {
-            $disk->put($file->getPath(null), $stream);
+            $disk->put($file->getPath(), $stream);
         } else {
             $disk->put($file->getPath($transformation), $stream);
         }
 
         // Close the stream again
-        if (is_resource($stream)) {
+        if (\is_resource($stream)) {
             fclose($stream);
         }
 
         // Cleanup our temp file
-        if (null !== $destination) {
+        if ($destination !== null) {
             @unlink($destination);
         }
 
         // Cleanup the local copy of the file
-        if (null !== $localPath) {
+        if ($localPath !== null) {
             $file->setLocalPath(null);
 
             @unlink($localPath);

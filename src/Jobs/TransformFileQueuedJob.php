@@ -2,11 +2,12 @@
 
 namespace CipeMotion\Medialibrary\Jobs;
 
+use Illuminate\Bus\Queueable;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Contracts\Queue\ShouldQueue;
 
 class TransformFileQueuedJob extends TransformFileJob implements ShouldQueue
 {
-    use InteractsWithQueue, SerializesModels;
+    use Queueable, InteractsWithQueue, SerializesModels;
 }

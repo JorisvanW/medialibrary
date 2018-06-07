@@ -22,5 +22,5 @@ interface IPathGenerator
      *
      * @return string
      */
-    public function getPathForTransformation(File $file, Transformation $transformation = null);
+    public function getPathForTransformation(File $file, Transformation $transformation = null): string;
 }

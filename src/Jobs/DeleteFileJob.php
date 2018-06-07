@@ -2,16 +2,12 @@
 
 namespace CipeMotion\Medialibrary\Jobs;
 
-use Storage;
-use Illuminate\Queue\SerializesModels;
-use Illuminate\Queue\InteractsWithQueue;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use CipeMotion\Medialibrary\Entities\Attachable;
 
 class DeleteFileJob extends Job implements ShouldQueue
 {
-    use InteractsWithQueue, SerializesModels;
-
     /**
      * The file id.
      *

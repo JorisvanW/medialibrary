@@ -9,8 +9,8 @@ use RuntimeException;
 use CipeMotion\Medialibrary\Jobs;
 use Intervention\Image\Facades\Image;
 use CipeMotion\Medialibrary\FileTypes;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Database\Eloquent\Builder;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 
@@ -33,6 +33,7 @@ use Symfony\Component\HttpFoundation\File\UploadedFile;
  * @property bool                                     completed
  * @property \Illuminate\Database\Eloquent\Collection attachables
  * @property int|null                                 category_id
+ * @property string                                   download_url
  * @property \Illuminate\Database\Eloquent\Collection transformations
  */
 class File extends Model
@@ -125,8 +126,8 @@ class File extends Model
     /**
      * Handle dynamic method calls into the model.
      *
-     * @param  string $method
-     * @param  array  $parameters
+     * @param string $method
+     * @param array  $parameters
      *
      * @return mixed
      */
@@ -464,8 +465,8 @@ class File extends Model
     /**
      * The file owner.
      *
-     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
      * @throws \Exception
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
      */
     public function owner()
     {
@@ -479,8 +480,8 @@ class File extends Model
     /**
      * The file user.
      *
-     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
      * @throws \Exception
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
      */
     public function user()
     {
@@ -733,6 +734,46 @@ class File extends Model
 
         // Something went wrong and the file is not uploaded
         return false;
+    }
+
+    /**
+     * File upload helper.
+     *
+     * @param array                                    $data
+     * @param array                                    $attributes
+     * @param string|null                              $disk
+     * @param bool|\Illuminate\Database\Eloquent\Model $owner
+     * @param bool|\Illuminate\Database\Eloquent\Model $user
+     *
+     * @return bool|\CipeMotion\Medialibrary\Entities\File
+     */
+    public static function uploadExternalFile(array $data, array $attributes = [], $disk = null, $owner = false, $user = false)
+    {
+        $filePathDir = Uuid::uuid4()->toString();
+
+        Storage::disk('medialibrary_temp')->makeDirectory($filePathDir);
+
+        $filePathName = $filePathDir . '/' . array_get($data, 'name');
+
+        $filePath = Storage::disk('medialibrary_temp')->path($filePathName);
+
+        if (!is_null($accessToken = array_get($data, 'accessToken'))) {
+            $context = stream_context_create(['http' => ['header' => "Authorization: Bearer $accessToken"]]);
+
+            $fileCreated = copy(array_get($data, 'url'), $filePath, $context);
+        } else {
+            $fileCreated = copy(array_get($data, 'url'), $filePath);
+        }
+
+        $result = false;
+
+        if ($fileCreated && Storage::disk('medialibrary_temp')->exists($filePathName)) {
+            $result = self::uploadFile(new UploadedFile($filePath, array_get($data, 'name')), $attributes, $disk, $owner, $user);
+        }
+
+        Storage::disk('medialibrary_temp')->deleteDir($filePathDir);
+
+        return $result;
     }
 
     /**

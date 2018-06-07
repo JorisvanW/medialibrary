@@ -2,8 +2,6 @@
 
 namespace CipeMotion\Medialibrary\Entities;
 
-use Image;
-use Storage;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Builder;
 
@@ -29,7 +27,7 @@ class Attachable extends Model
      * @param \Illuminate\Database\Eloquent\Builder         $query
      * @param string|\CipeMotion\Medialibrary\Entities\File $file
      */
-    public function scopeForFile(Builder $query, $file)
+    public function scopeForFile(Builder $query, $file): void
     {
         $fileId = ($file instanceof File) ? $file->id : $file;
 
