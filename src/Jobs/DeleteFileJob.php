@@ -6,7 +6,7 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use CipeMotion\Medialibrary\Entities\Attachable;
 
-class DeleteFileJob extends Job implements ShouldQueue
+class DeleteFileJob implements ShouldQueue
 {
     /**
      * The file id.
