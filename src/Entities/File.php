@@ -737,6 +737,46 @@ class File extends Model
     }
 
     /**
+     * File upload helper.
+     *
+     * @param array                                    $data
+     * @param array                                    $attributes
+     * @param string|null                              $disk
+     * @param bool|\Illuminate\Database\Eloquent\Model $owner
+     * @param bool|\Illuminate\Database\Eloquent\Model $user
+     *
+     * @return bool|\CipeMotion\Medialibrary\Entities\File
+     */
+    public static function uploadExternalFile(array $data, array $attributes = [], $disk = null, $owner = false, $user = false)
+    {
+        $filePathDir = Uuid::uuid4()->toString();
+
+        Storage::disk('medialibrary_temp')->makeDirectory($filePathDir);
+
+        $filePathName = $filePathDir . '/' . array_get($data, 'name');
+
+        $filePath = Storage::disk('medialibrary_temp')->path($filePathName);
+
+        if (!is_null($accessToken = array_get($data, 'accessToken'))) {
+            $context = stream_context_create(['http' => ['header' => "Authorization: Bearer $accessToken"]]);
+
+            $fileCreated = copy(array_get($data, 'url'), $filePath, $context);
+        } else {
+            $fileCreated = copy(array_get($data, 'url'), $filePath);
+        }
+
+        $result = false;
+
+        if ($fileCreated && Storage::disk('medialibrary_temp')->exists($filePathName)) {
+            $result = self::uploadFile(new UploadedFile($filePath, array_get($data, 'name')), $attributes, $disk, $owner, $user);
+        }
+
+        Storage::disk('medialibrary_temp')->deleteDir($filePathDir);
+
+        return $result;
+    }
+
+    /**
      * Check if the disk is stored locally.
      *
      * @return bool

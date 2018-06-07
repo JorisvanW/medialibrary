@@ -22,6 +22,29 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Services
+    |--------------------------------------------------------------------------
+    */
+
+    'services' => [
+        'dropbox' => [
+            'key'    => env('MEDIALIBRARY_DROPBOX_KEY'),
+            'secret' => env('MEDIALIBRARY_DROPBOX_SECRET'),
+        ],
+
+        'onedrive' => [
+            'key'    => env('MEDIALIBRARY_ONEDRIVE_KEY'),
+            'secret' => env('MEDIALIBRARY_ONEDRIVE_SECRET'),
+        ],
+
+        'googledrive' => [
+            'key'    => env('MEDIALIBRARY_GOOGLE_DRIVE_KEY'),
+            'secret' => env('MEDIALIBRARY_GOOGLE_DRIVE_SECRET'),
+        ],
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
     | Relations
     |--------------------------------------------------------------------------
     */
