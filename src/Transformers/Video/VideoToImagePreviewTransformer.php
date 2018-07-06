@@ -2,6 +2,7 @@
 
 namespace CipeMotion\Medialibrary\Transformers\Video;
 
+use Image;
 use CloudConvert\Api;
 use Illuminate\Support\Facades\Storage;
 use CipeMotion\Medialibrary\Entities\File;
