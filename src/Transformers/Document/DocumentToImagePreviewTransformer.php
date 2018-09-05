@@ -141,9 +141,6 @@ class DocumentToImagePreviewTransformer implements ITransformer
         $preview->extension = $extension;
         $preview->completed = true;
 
-        // Store the preview
-        $file->transformations()->save($preview);
-
         if (array_get($this->config, 'fit', false)) {
             $image->fit(
                 array_get($this->config, 'size.w', null),
@@ -193,6 +190,9 @@ class DocumentToImagePreviewTransformer implements ITransformer
 
         // Upload the preview
         $disk->put($file->getPath($transformation), $stream);
+
+        // Store the preview
+        $file->transformations()->save($preview);
 
         // Cleanup our streams
         if (\is_resource($stream)) {
