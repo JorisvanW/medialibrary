@@ -64,7 +64,7 @@ class VideoToImagePreviewTransformer implements ITransformer
         $audioCodec      = strtolower(array_get($this->config, 'audio.codec', 'aac'));
 
         // Retrieve the file info and generate a thumb
-        list($preview, $thumb, $fileInfo) = $this->generateThumbAndRetrieveFileInfo($file);
+        [$preview, $thumb, $fileInfo] = $this->generateThumbAndRetrieveFileInfo($file);
 
         // Build up the base settings
         $cloudconvertSettings = [
@@ -72,7 +72,7 @@ class VideoToImagePreviewTransformer implements ITransformer
             'outputformat'     => $extension,
             'wait'             => true,
             'input'            => 'download',
-            'file'             => $file->downloadUrl,
+            'file'             => $file->download_url,
             'converteroptions' => [
                 'video_codec' => 'copy',
                 'audio_codec' => 'copy',
@@ -85,12 +85,12 @@ class VideoToImagePreviewTransformer implements ITransformer
 
         // Find the video stream with the correct codec if any
         $videoStream = $streams->first(function ($stream) use ($videoCodec, $videoResolution) {
-            return ($stream->codec_type === 'video' &&
-                    strtolower($stream->codec_name) === $videoCodec &&
-                    "{$stream->width}x{$stream->height}" === $videoResolution);
+            return $stream->codec_type === 'video'
+                   && strtolower($stream->codec_name) === $videoCodec
+                   && "{$stream->width}x{$stream->height}" === $videoResolution;
         });
 
-        // If there is no compataible video stream, reencode it
+        // If there is no compatible video stream, reencode it
         if (empty($videoStream)) {
             $cloudconvertSettings['converteroptions']['video_codec']      = $videoCodec;
             $cloudconvertSettings['converteroptions']['video_resolution'] = $videoResolution;
@@ -98,7 +98,8 @@ class VideoToImagePreviewTransformer implements ITransformer
 
         // Find the audio stream with the correct codec if any
         $audioStream = $streams->first(function ($stream) use ($audioCodec) {
-            return ($stream->codec_type === 'audio' && strtolower($stream->codec_name) === $audioCodec);
+            return $stream->codec_type === 'audio'
+                   && strtolower($stream->codec_name) === $audioCodec;
         });
 
         // If there is no compataible audio stream, reencode it
@@ -145,7 +146,7 @@ class VideoToImagePreviewTransformer implements ITransformer
                 $disk->delete($file->getPath());
             }
 
-            $disk->put($file->getPath(), $stream);
+            $disk->put(str_replace_last(".{$file->extension}", ".{$transformation->extension}", $file->getPath()), $stream);
         } else {
             $disk->put($file->getPath($transformation), $stream);
         }
