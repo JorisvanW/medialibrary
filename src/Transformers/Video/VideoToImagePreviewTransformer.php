@@ -58,10 +58,13 @@ class VideoToImagePreviewTransformer implements ITransformer
     public function transform(File $file): Transformation
     {
         // Extract config options
-        $extension       = array_get($this->config, 'extension', 'mp4');
-        $videoCodec      = strtolower(array_get($this->config, 'video.codec', 'h264'));
-        $videoResolution = array_get($this->config, 'video.resolution', '1280x720');
-        $audioCodec      = strtolower(array_get($this->config, 'audio.codec', 'aac'));
+        $extension  = array_get($this->config, 'extension', 'mp4');
+        $videoCodec = strtolower(array_get($this->config, 'video.codec', 'h264'));
+        $audioCodec = strtolower(array_get($this->config, 'audio.codec', 'aac'));
+
+        // Different resolutions for different rotations
+        $videoResolutionLandscape = array_get($this->config, 'video.resolution.landscape', '1280x720');
+        $videoResolutionPortrait  = array_get($this->config, 'video.resolution.portrait', '720x1280');
 
         // Retrieve the file info and generate a thumb
         [$preview, $thumb, $fileInfo] = $this->generateThumbAndRetrieveFileInfo($file);
@@ -82,6 +85,14 @@ class VideoToImagePreviewTransformer implements ITransformer
 
         // Collect the streams from the video info
         $streams = collect($fileInfo->info->streams);
+
+        // Get the first video stream so we can check if it's rotated
+        $firstVideoStream = $streams->first(function ($stream) {
+            return $stream->codec_type === 'video';
+        });
+
+        // Define the resolution we are going to work with, landscape or portrait
+        $videoResolution = $firstVideoStream->width > $firstVideoStream->height && empty($firstVideoStream->tags->rotate) ? $videoResolutionLandscape : $videoResolutionPortrait;
 
         // Find the video stream with the correct codec if any
         $videoStream = $streams->first(function ($stream) use ($videoCodec, $videoResolution) {
