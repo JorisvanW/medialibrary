@@ -590,23 +590,36 @@ class File extends Model
     /**
      * Find the type for the mime type.
      *
-     * @param string $mime
+     * @param string      $mime
+     * @param string|null $extension
      *
      * @return string|null
      */
-    public static function getTypeForMime($mime)
+    public static function getTypeForMime($fileMime, $fileExtension = null)
     {
-        $types = config('medialibrary.file_types');
+        return collect(config('medialibrary.file_types'))->map(function ($fileTypeConfig, $fileType) use ($fileMime, $fileExtension) {
+            $guessedExtension = null;
 
-        foreach ($types as $type => $data) {
-            $allowed = array_flatten(array_values(array_get($data, 'mimes')));
+            // Try and find an extension by it's mime type (and optionaly extension)
+            collect($fileTypeConfig['mimes'])->each(function ($mimes, $extension) use ($fileMime, $fileExtension, &$guessedExtension) {
+                if (in_array($fileMime, (array)$mimes, true)) {
+                    // Test if the extension matches what we expect it to be
+                    // If the file extension is null we skip the check
+                    if ($fileExtension === null || $extension === $fileExtension) {
+                        $guessedExtension = $extension;
 
-            if (in_array($mime, $allowed, true)) {
-                return $type;
+                        return false;
+                    }
+                }
+            });
+
+            // If the guessed extension is null we did not locate the correct file type
+            if ($guessedExtension === null) {
+                return null;
             }
-        }
 
-        return null;
+            return $fileType;
+        })->filter()->first();
     }
 
     /**
@@ -666,17 +679,17 @@ class File extends Model
 
         // Find the mime type using the client mime if we are allowed to do that
         if (array_get($attributes, 'client_mime', false) === true) {
-            $type = self::getTypeForMime($mimeType = $upload->getClientMimeType());
+            $type = self::getTypeForMime($mimeType = $upload->getClientMimeType(), $upload->getClientOriginalExtension());
         }
 
         // If we could not find a file type use the actual mime type by the server
         if ($type === null) {
-            $type = self::getTypeForMime($mimeType = $upload->getMimeType());
+            $type = self::getTypeForMime($mimeType = $upload->getMimeType(), $upload->getClientOriginalExtension());
         }
 
         // If we could not find a mime type use the client mime (unless we already tried)
         if ($type === null && array_get($attributes, 'client_mime', false) === false && array_get($attributes, 'client_mime_fallback', true) === true) {
-            $type = self::getTypeForMime($mimeType = $upload->getClientMimeType());
+            $type = self::getTypeForMime($mimeType = $upload->getClientMimeType(), $upload->getClientOriginalExtension());
         }
 
         // Abort if we cannot find a valid type, this file is probably not allowed
