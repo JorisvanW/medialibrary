@@ -590,13 +590,15 @@ class File extends Model
     /**
      * Find the type for the mime type.
      *
-     * @param string      $mime
-     * @param string|null $extension
+     * @param string      $fileMime
+     * @param string|null $fileExtension
      *
      * @return string|null
      */
     public static function getTypeForMime($fileMime, $fileExtension = null)
     {
+        $fileExtension = $fileExtension === null ? $fileExtension : strtolower($fileExtension);
+
         return collect(config('medialibrary.file_types'))->map(function ($fileTypeConfig, $fileType) use ($fileMime, $fileExtension) {
             $guessedExtension = null;
 
