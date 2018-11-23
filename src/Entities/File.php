@@ -783,9 +783,9 @@ class File extends Model
         if (!is_null($accessToken = array_get($data, 'accessToken'))) {
             $context = stream_context_create(['http' => ['header' => "Authorization: Bearer $accessToken"]]);
 
-            $fileCreated = copy(array_get($data, 'url'), $filePath, $context);
+            $fileCreated = @copy(array_get($data, 'url'), $filePath, $context);
         } else {
-            $fileCreated = copy(array_get($data, 'url'), $filePath);
+            $fileCreated = @copy(array_get($data, 'url'), $filePath);
         }
 
         $result = false;
