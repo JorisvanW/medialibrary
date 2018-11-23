@@ -20,7 +20,7 @@ interface ITransformer
      *
      * @param \CipeMotion\Medialibrary\Entities\File $file
      *
-     * @return \CipeMotion\Medialibrary\Entities\Transformation
+     * @return \CipeMotion\Medialibrary\Entities\Transformation|null
      */
-    public function transform(File $file): Transformation;
+    public function transform(File $file): ?Transformation;
 }

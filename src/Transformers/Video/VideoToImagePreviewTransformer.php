@@ -51,11 +51,9 @@ class VideoToImagePreviewTransformer implements ITransformer
      *
      * @param \CipeMotion\Medialibrary\Entities\File $file
      *
-     * @throws \CloudConvert\Exceptions\ApiException
-     * @throws \GuzzleHttp\Exception\GuzzleException
-     * @return Transformation
+     * @return \CipeMotion\Medialibrary\Entities\Transformation|null
      */
-    public function transform(File $file): Transformation
+    public function transform(File $file): ?Transformation
     {
         // Extract config options
         $extension  = array_get($this->config, 'extension', 'mp4');
