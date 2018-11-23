@@ -2,9 +2,9 @@
 
 namespace CipeMotion\Medialibrary\Jobs;
 
-use RuntimeException;
 use CipeMotion\Medialibrary\Entities\File;
 use CipeMotion\Medialibrary\Transformers\ITransformer;
+use CipeMotion\Medialibrary\Exceptions\UnknownTransformerException;
 
 abstract class TransformFileJob
 {
@@ -80,7 +80,7 @@ abstract class TransformFileJob
                 $this->file->transformations()->save($transformation);
             }
         } else {
-            throw new RuntimeException('Unknown MediaLibrary transformer.');
+            throw new UnknownTransformerException("Unknown transformer:{$this->transformer}.");
         }
     }
 }
