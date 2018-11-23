@@ -235,15 +235,23 @@ class File extends Model
             if ($this->isDiskLocal($this->disk)) {
                 $localPath = config("filesystems.disks.{$this->disk}.root") . '/' . $this->getPath();
 
-                if (null !== $path) {
-                    copy($localPath, $path);
+                if ($path !== null) {
+                    $result = @copy($localPath, $path);
+
+                    if ($result === false) {
+                        throw new RuntimeException("Could not copy file:{$this->id} to local path:" . $path);
+                    }
                 }
 
-                $this->setLocalPath(null === $path ? $localPath : $path);
+                $this->setLocalPath($path ?? $localPath);
             } else {
-                $temp = null === $path ? get_temp_path() : $path;
+                $temp = $path ?? get_temp_path();
 
-                copy($this->getDownloadUrlAttribute(), $temp);
+                $result = @copy($this->getDownloadUrlAttribute(), $temp);
+
+                if ($result === false) {
+                    throw new RuntimeException("Could not copy file:{$this->id} to temp path:" . $temp);
+                }
 
                 $this->setLocalPath($temp);
             }
