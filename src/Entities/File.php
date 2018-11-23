@@ -776,7 +776,7 @@ class File extends Model
 
         Storage::disk('medialibrary_temp')->makeDirectory($filePathDir);
 
-        $filePathName = $filePathDir . '/' . array_get($data, 'name');
+        $filePathName = $filePathDir . '/' . strtolower(str_replace([' ', '/', '\\'], '_', array_get($data, 'name')));
 
         $filePath = Storage::disk('medialibrary_temp')->path($filePathName);
 
