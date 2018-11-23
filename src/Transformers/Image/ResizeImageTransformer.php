@@ -43,9 +43,9 @@ class ResizeImageTransformer implements ITransformer
      *
      * @param \CipeMotion\Medialibrary\Entities\File $file
      *
-     * @return Transformation
+     * @return \CipeMotion\Medialibrary\Entities\Transformation
      */
-    public function transform(File $file): Transformation
+    public function transform(File $file): ?Transformation
     {
         // Get a temp path to work with
         $destination = get_temp_path();

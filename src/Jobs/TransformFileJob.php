@@ -2,6 +2,7 @@
 
 namespace CipeMotion\Medialibrary\Jobs;
 
+use RuntimeException;
 use CipeMotion\Medialibrary\Entities\File;
 use CipeMotion\Medialibrary\Transformers\ITransformer;
 use CipeMotion\Medialibrary\Exceptions\UnknownTransformerException;
@@ -61,11 +62,12 @@ abstract class TransformFileJob
         $transformer = new $this->transformer($this->name, $this->config);
 
         if ($transformer instanceof ITransformer) {
+            // Perform the transformation
             $transformation = $transformer->transform($this->file);
 
-            // Could not transform this document, skip the transformation
+            // Throw an exception if we not have a transformation instance since it failed
             if ($transformation === null) {
-                return;
+                throw new RuntimeException('Something went wrong while transforming file:' . $this->file->id);
             }
 
             if (array_get($this->config, 'default', false)) {
