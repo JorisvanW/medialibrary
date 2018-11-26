@@ -748,6 +748,14 @@ class File extends Model
 
         // Check if we succeeded
         if ($success) {
+            // Validate we have a file that is not empty
+            // if the file is empty delete it and report failed upload
+            if (Storage::disk($disk)->size($file->getPath()) <= 1) {
+                Storage::disk($disk)->delete($file->getPath());
+
+                return false;
+            }
+
             $file->setLocalPath($upload->getRealPath());
 
             $file->save();
