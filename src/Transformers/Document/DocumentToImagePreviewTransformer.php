@@ -57,7 +57,7 @@ class DocumentToImagePreviewTransformer implements ITransformer
      */
     public function transform(File $file): ?Transformation
     {
-        $extension = array_get($this->config, 'extension', 'jpg');
+        $extension = array_get($this->config, "output.format.{$file->extension}") ?? array_get($this->config, 'extension', 'jpg');
 
         $cloudconvertSettings = [
             'inputformat'      => $file->extension,
