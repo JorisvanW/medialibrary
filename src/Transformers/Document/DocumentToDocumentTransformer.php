@@ -56,7 +56,7 @@ class DocumentToDocumentTransformer implements ITransformer
      */
     public function transform(File $file): ?Transformation
     {
-        $extension = array_get($this->config, 'extension', 'pdf');
+        $extension = array_get($this->config, "output.format.{$file->extension}") ?? array_get($this->config, 'extension', 'pdf');
 
         $cloudconvertSettings = [
             'inputformat'      => $file->extension,
