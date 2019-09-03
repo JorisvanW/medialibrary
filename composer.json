@@ -19,7 +19,7 @@
         "php": ">=7.1",
         "ramsey/uuid": "^3.5",
         "statamic/stringy": "^2.8|^3.0",
-        "laravel/framework": "^5.3",
+        "laravel/framework": "^5.3|^6.0",
         "intervention/image": "^2.3",
         "cloudconvert/cloudconvert-php": "^2.2"
     },
