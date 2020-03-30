@@ -37,7 +37,7 @@ class TransformFileQueuedJob extends TransformFileJob implements ShouldQueue
             }
 
             // Retry with an exponential backoff schedule (1, 4, 8, 16 minutes)
-            $this->release(now()->addMinutes($this->attempts() <= 1 ? 1 : pow(2, $this->attempts() * 1)));
+            $this->release(now()->addMinutes($this->attempts() <= 1 ? 1 : 2 ** ($this->attempts() * 1)));
         }
     }
 }

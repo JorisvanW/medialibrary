@@ -73,7 +73,7 @@ class S3PresignedUrlGenerator implements IUrlGenerator
         ];
 
         if ($download) {
-            $filename = (string)Stringy::create($file->name)->slugify() . ".{$extension}";
+            $filename = Stringy::create($file->name)->slugify() . ".{$extension}";
 
             $commandParams['ResponseContentDisposition'] = 'attachment; filename=' . $filename;
         }
