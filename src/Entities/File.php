@@ -2,7 +2,6 @@
 
 namespace CipeMotion\Medialibrary\Entities;
 
-use Exception;
 use Stringy\Stringy;
 use Ramsey\Uuid\Uuid;
 use RuntimeException;
@@ -363,11 +362,7 @@ class File extends Model
      */
     public function setNameAttribute($value)
     {
-        if (empty($value)) {
-            $value = null;
-        }
-
-        $this->attributes['name'] = $value;
+        $this->attributes['name'] = empty($value) ? null : $value;
     }
 
     /**
@@ -486,7 +481,7 @@ class File extends Model
     public function owner()
     {
         if (null === config('medialibrary.relations.owner.model')) {
-            throw new Exception('Medialibrary: owner relation is not set in medialibrary.php');
+            throw new RuntimeException('Medialibrary: owner relation is not set in medialibrary.php');
         }
 
         return $this->belongsTo(config('medialibrary.relations.owner.model'));
@@ -501,7 +496,7 @@ class File extends Model
     public function user()
     {
         if (null === config('medialibrary.relations.user.model')) {
-            throw new Exception('Medialibrary: user relation is not set in medialibrary.php');
+            throw new RuntimeException('Medialibrary: user relation is not set in medialibrary.php');
         }
 
         return $this->belongsTo(config('medialibrary.relations.user.model'));
@@ -581,7 +576,7 @@ class File extends Model
             $transformerGroups = config("medialibrary.file_types.{$this->attributes['type']}.transformationGroups");
 
             // Check if we have transformation group else use default
-            $group            = isset($this->attributes['group']) ? $this->attributes['group'] : null;
+            $group            = $this->attributes['group'] ?? null;
             $transformerGroup = array_get($transformerGroups, null === $group || !array_has($transformerGroups, $group) ? 'default' : $group, []);
 
             // Transformations array with default thumb generator
@@ -594,7 +589,7 @@ class File extends Model
                 $transformations[$transformationName] = array_get($transformers, $transformationName);
             }
 
-            $this->groupTransformationsCache = array_filter($transformations, function ($transformer) {
+            $this->groupTransformationsCache = array_filter($transformations, static function ($transformer) {
                 return null !== $transformer;
             });
         }
@@ -614,11 +609,11 @@ class File extends Model
     {
         $fileExtension = $fileExtension === null ? $fileExtension : strtolower($fileExtension);
 
-        return collect(config('medialibrary.file_types'))->map(function ($fileTypeConfig, $fileType) use ($fileMime, $fileExtension) {
+        return collect(config('medialibrary.file_types'))->map(static function ($fileTypeConfig, $fileType) use ($fileMime, $fileExtension) {
             $guessedExtension = null;
 
             // Try and find an extension by it's mime type (and optionaly extension)
-            collect($fileTypeConfig['mimes'])->each(function ($mimes, $extension) use ($fileMime, $fileExtension, &$guessedExtension) {
+            collect($fileTypeConfig['mimes'])->each(static function ($mimes, $extension) use ($fileMime, $fileExtension, &$guessedExtension) {
                 if (in_array($fileMime, (array)$mimes, true)) {
                     // Test if the extension matches what we expect it to be
                     // If the file extension is null we skip the check
@@ -662,7 +657,7 @@ class File extends Model
         $file->id = Uuid::uuid4()->toString();
 
         // Retrieve the disk from the config unless it's given to us
-        $disk = null === $disk ? call_user_func(config('medialibrary.disk')) : $disk;
+        $disk = $disk ?? call_user_func(config('medialibrary.disk'));
 
         // Check if we need to resolve the owner
         if ($owner === false && null !== config('medialibrary.relations.owner.model')) {
@@ -716,7 +711,6 @@ class File extends Model
 
         // If the file is a image we also need to find out the dimensions
         if ($type === FileTypes::TYPE_IMAGE) {
-            /** @var \Intervention\Image\Image $image */
             $image = Image::make($upload);
 
             if (array_get($attributes, 'orientate', true)) {
@@ -815,17 +809,6 @@ class File extends Model
     }
 
     /**
-     * Check if the disk is stored locally.
-     *
-     * @return bool
-     */
-    private function isDiskLocal($disk)
-    {
-        return config("filesystems.disks.{$disk}.driver") === 'local';
-    }
-
-
-    /**
      * Request a transformation.
      *
      * @param string $name
@@ -855,5 +838,17 @@ class File extends Model
         }
 
         dispatch($job);
+    }
+
+    /**
+     * Check if the disk is stored locally.
+     *
+     * @param string $disk
+     *
+     * @return bool
+     */
+    private function isDiskLocal(string $disk): bool
+    {
+        return config("filesystems.disks.{$disk}.driver") === 'local';
     }
 }

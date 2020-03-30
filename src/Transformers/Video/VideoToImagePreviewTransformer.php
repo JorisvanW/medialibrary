@@ -85,7 +85,7 @@ class VideoToImagePreviewTransformer implements ITransformer
         $streams = collect($fileInfo->info->streams);
 
         // Get the first video stream so we can check if it's rotated
-        $firstVideoStream = $streams->first(function ($stream) {
+        $firstVideoStream = $streams->first(static function ($stream) {
             return $stream->codec_type === 'video';
         });
 
@@ -93,7 +93,7 @@ class VideoToImagePreviewTransformer implements ITransformer
         $videoResolution = $firstVideoStream->width > $firstVideoStream->height && empty($firstVideoStream->tags->rotate) ? $videoResolutionLandscape : $videoResolutionPortrait;
 
         // Find the video stream with the correct codec if any
-        $videoStream = $streams->first(function ($stream) use ($videoCodec, $videoResolution) {
+        $videoStream = $streams->first(static function ($stream) use ($videoCodec, $videoResolution) {
             return $stream->codec_type === 'video'
                    && strtolower($stream->codec_name) === $videoCodec
                    && "{$stream->width}x{$stream->height}" === $videoResolution;
@@ -106,7 +106,7 @@ class VideoToImagePreviewTransformer implements ITransformer
         }
 
         // Find the audio stream with the correct codec if any
-        $audioStream = $streams->first(function ($stream) use ($audioCodec) {
+        $audioStream = $streams->first(static function ($stream) use ($audioCodec) {
             return $stream->codec_type === 'audio'
                    && strtolower($stream->codec_name) === $audioCodec;
         });

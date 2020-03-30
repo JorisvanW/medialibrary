@@ -32,11 +32,11 @@ class Attachable extends Model
      * Scope the query to select attachables by file (id).
      *
      * @param \Illuminate\Database\Eloquent\Builder         $query
-     * @param string|\CipeMotion\Medialibrary\Entities\File $file
+     * @param \CipeMotion\Medialibrary\Entities\File|string $file
      */
     public function scopeForFile(Builder $query, $file): void
     {
-        $fileId = ($file instanceof File) ? $file->id : $file;
+        $fileId = $file instanceof File ? $file->id : $file;
 
         $query->where('file_id', $fileId);
     }
