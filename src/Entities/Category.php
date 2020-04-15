@@ -7,8 +7,8 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 
 /**
- * @property int      order
- * @property int|null parent_id
+ * @property int      $order
+ * @property int|null $parent_id
  */
 class Category extends Model
 {
