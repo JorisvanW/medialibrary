@@ -14,26 +14,26 @@ use Illuminate\Database\Eloquent\Builder;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 
 /**
- * @property string                                   id
- * @property string                                   type
- * @property string                                   disk
- * @property int                                      size
- * @property string                                   name
- * @property string|null                              group
- * @property int                                      width
- * @property int                                      height
- * @property string|null                              caption
- * @property string|int|null                          user_id
- * @property string                                   filename
- * @property string|int|null                          owner_id
- * @property string                                   mime_type
- * @property bool                                     is_hidden
- * @property string                                   extension
- * @property bool                                     completed
- * @property \Illuminate\Database\Eloquent\Collection attachables
- * @property int|null                                 category_id
- * @property string                                   download_url
- * @property \Illuminate\Database\Eloquent\Collection transformations
+ * @property string                                   $id
+ * @property string                                   $type
+ * @property string                                   $disk
+ * @property int                                      $size
+ * @property string                                   $name
+ * @property string|null                              $group
+ * @property int                                      $width
+ * @property int                                      $height
+ * @property string|null                              $caption
+ * @property string|int|null                          $user_id
+ * @property string                                   $filename
+ * @property string|int|null                          $owner_id
+ * @property string                                   $mime_type
+ * @property bool                                     $is_hidden
+ * @property string                                   $extension
+ * @property bool                                     $completed
+ * @property \Illuminate\Database\Eloquent\Collection $attachables
+ * @property int|null                                 $category_id
+ * @property string                                   $download_url
+ * @property \Illuminate\Database\Eloquent\Collection $transformations
  */
 class File extends Model
 {

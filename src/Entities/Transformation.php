@@ -5,17 +5,17 @@ namespace CipeMotion\Medialibrary\Entities;
 use Illuminate\Database\Eloquent\Model;
 
 /**
- * @property string                                 name
- * @property string                                 type
- * @property \CipeMotion\Medialibrary\Entities\File file
- * @property int                                    size
- * @property int                                    width
- * @property int                                    height
- * @property bool                                   filename
- * @property int                                    raw_size
- * @property string                                 mime_type
- * @property string                                 extension
- * @property bool                                   completed
+ * @property string                                 $name
+ * @property string                                 $type
+ * @property \CipeMotion\Medialibrary\Entities\File $file
+ * @property int                                    $size
+ * @property int                                    $width
+ * @property int                                    $height
+ * @property bool                                   $filename
+ * @property int                                    $raw_size
+ * @property string                                 $mime_type
+ * @property string                                 $extension
+ * @property bool                                   $completed
  */
 class Transformation extends Model
 {
