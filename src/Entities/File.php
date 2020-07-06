@@ -5,12 +5,14 @@ namespace CipeMotion\Medialibrary\Entities;
 use Stringy\Stringy;
 use Ramsey\Uuid\Uuid;
 use RuntimeException;
+use GuzzleHttp\Client;
 use CipeMotion\Medialibrary\Jobs;
 use Intervention\Image\Facades\Image;
 use CipeMotion\Medialibrary\FileTypes;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Database\Eloquent\Builder;
+use GuzzleHttp\Exception\TransferException;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 
 /**
@@ -789,12 +791,23 @@ class File extends Model
 
         $filePath = Storage::disk('medialibrary_temp')->path($filePathName);
 
-        if (!is_null($accessToken = array_get($data, 'accessToken'))) {
-            $context = stream_context_create(['http' => ['header' => "Authorization: Bearer $accessToken"]]);
+        $requestOptions = [
+            'sink'    => $filePath,
+            'headers' => [],
+        ];
 
-            $fileCreated = @copy(array_get($data, 'url'), $filePath, $context);
-        } else {
-            $fileCreated = @copy(array_get($data, 'url'), $filePath);
+        if (!is_null($accessToken = array_get($data, 'accessToken'))) {
+            $requestOptions['headers']['Authorization'] = "Bearer {$accessToken}";
+        }
+
+        $fileCreated = false;
+
+        try {
+            (new Client)->request('GET', array_get($data, 'url'), $requestOptions);
+
+            $fileCreated = true;
+        } catch (TransferException $e) {
+            // We ignore request exceptions since they are mostly not interesting and should be retried...
         }
 
         $result = false;
