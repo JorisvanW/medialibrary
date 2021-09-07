@@ -22,7 +22,7 @@
         "guzzlehttp/guzzle": "^6.0|^7.0",
         "laravel/framework": "^5.3|^6.0|^7.0|^8.0",
         "intervention/image": "^2.3",
-        "cloudconvert/cloudconvert-php": "^2.2"
+        "cloudconvert/cloudconvert-php": "^2.2|^3.2"
     },
     "require-dev": {
         "aws/aws-sdk-php": "^3.19"
