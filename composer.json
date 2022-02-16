@@ -20,7 +20,7 @@
         "ramsey/uuid": "^3.5|^4.0",
         "statamic/stringy": "^2.8|^3.0",
         "guzzlehttp/guzzle": "^6.0|^7.0",
-        "laravel/framework": "^5.3|^6.0|^7.0|^8.0",
+        "laravel/framework": "^5.3|^6.0|^7.0|^8.0|^9.0",
         "intervention/image": "^2.3",
         "cloudconvert/cloudconvert-php": "^2.2|^3.2"
     },
